@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func RegisterHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
+func LoginHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		content, err := body.Content(r)
 		if err != nil {
@@ -18,12 +18,13 @@ func RegisterHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
 			return
 		}
 
-		tokenRaw, err := auth.Register(r.Context(), repository, content)
+		tokenRaw, err := auth.Login(r.Context(), repository, content)
 		if err != nil {
 			logging.Sugar.Info(err)
-			var loginExistsError *auth.LoginExistsError
-			if errors.As(err, &loginExistsError) {
-				w.WriteHeader(http.StatusConflict)
+			var loginAbsentError *auth.LoginAbsentError
+			var incorrectPasswordError *auth.IncorrectPasswordError
+			if errors.As(err, &loginAbsentError) || errors.As(err, &incorrectPasswordError) {
+				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 

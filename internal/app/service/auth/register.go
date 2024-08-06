@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"context"
 	"diploma1/internal/app/entity"
 	"diploma1/internal/app/repo"
+	"diploma1/internal/app/service/logging"
 	"diploma1/internal/app/service/secret"
 	"errors"
 	"fmt"
@@ -17,46 +19,60 @@ type RegisterRequest struct {
 	Password string `json:"password"`
 }
 
-var ErrLoginExists = errors.New("such login already exists")
+type LoginExistsError struct {
+	Login string
+}
+
+func (e *LoginExistsError) Error() string {
+	return fmt.Sprintf("login already exists: \"%s\"", e.Login)
+}
+
 var ErrBadJson = errors.New("bad json")
 
-func Register(repository repo.UserRepositoryInterface, input []byte) error {
+func Register(ctx context.Context, repository repo.UserRepositoryInterface, input []byte) (string, error) {
 	registerRequest := &RegisterRequest{}
 	err := easyjson.Unmarshal(input, registerRequest)
 
 	if err != nil {
-		return ErrBadJson
+		return "", ErrBadJson
 	}
 
 	registerRequest.Login = strings.Trim(registerRequest.Login, " ")
 	registerRequest.Password = strings.Trim(registerRequest.Password, " ")
 
 	if registerRequest.Login == "" || registerRequest.Password == "" {
-		return fmt.Errorf("login or password is empty")
+		return "", fmt.Errorf("login or password is empty")
 	}
 
-	user, err := repository.UserByLogin(registerRequest.Login)
+	user, err := repository.UserByLogin(ctx, registerRequest.Login)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if user != nil {
-		return ErrLoginExists
+		return "", &LoginExistsError{Login: user.Login}
 	}
 
 	user = entity.NewUser()
 	user.Login = registerRequest.Login
 	passwordHash, err := secret.HashPassword(registerRequest.Password)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	user.Password = passwordHash
 
-	user, err = repository.AddUser(*user)
+	user, err = repository.AddUser(ctx, *user)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	token := GenerateToken(*user)
+	tokenRaw, err := TokenRaw(token)
+	if err != nil {
+		return "", err
+	}
+
+	logging.Sugar.Infof("User with ID: %s registered successfully", user.ID)
+	return tokenRaw, nil
 }

@@ -1,8 +1,11 @@
 package repo
 
-import "diploma1/internal/app/entity"
+import (
+	"context"
+	"diploma1/internal/app/entity"
+)
 
 type UserRepositoryInterface interface {
-	AddUser(user entity.User) (*entity.User, error)
-	UserByLogin(login string) (*entity.User, error)
+	AddUser(ctx context.Context, user entity.User) (*entity.User, error)
+	UserByLogin(ctx context.Context, login string) (*entity.User, error)
 }

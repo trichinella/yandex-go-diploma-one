@@ -21,7 +21,10 @@ func (s *Server) Run() {
 		_ = logging.Sugar.Sync()
 	}()
 
-	s.Router.Post(`/api/user/register`, handler.RegisterHandle(s.Repo))
+	s.Router.Group(func(r chi.Router) {
+		s.Router.Post(`/api/user/register`, handler.RegisterHandle(s.Repo))
+		s.Router.Post(`/api/user/login`, handler.LoginHandle(s.Repo))
+	})
 
 	logging.Sugar.Infow("Listen and serve", "Host", config.State().GopherMartAddress)
 	err := http.ListenAndServe(config.State().GopherMartAddress, s.Router)
