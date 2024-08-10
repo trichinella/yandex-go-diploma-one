@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func LoginHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
+func LoginHandle(repository repo.UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		content, err := body.Content(r)
 		if err != nil {
@@ -18,9 +18,9 @@ func LoginHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
 			return
 		}
 
-		tokenRaw, err := auth.Login(r.Context(), repository, content)
+		tokenString, err := auth.Login(r.Context(), repository, content)
 		if err != nil {
-			logging.Sugar.Info(err)
+			logging.Sugar.Error(err)
 			var loginAbsentError *auth.LoginAbsentError
 			var incorrectPasswordError *auth.IncorrectPasswordError
 			if errors.As(err, &loginAbsentError) || errors.As(err, &incorrectPasswordError) {
@@ -37,7 +37,7 @@ func LoginHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Authorization", "Bearer "+tokenRaw)
+		w.Header().Set("Authorization", auth.WrapTokenString(tokenString))
 		w.WriteHeader(http.StatusOK)
 	}
 }

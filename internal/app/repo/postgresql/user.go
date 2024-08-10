@@ -31,7 +31,7 @@ func (r PostgresRepository) AddUser(ctx context.Context, user entity.User) (*ent
 		logging.Sugar.Fatalf("Error adding user: %v", err)
 	}
 
-	return &user, nil
+	return &createdUser, nil
 }
 
 func (r PostgresRepository) UserByLogin(ctx context.Context, login string) (*entity.User, error) {

@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func RegisterHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
+func RegisterHandle(repository repo.UserRepository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		content, err := body.Content(r)
 		if err != nil {
@@ -18,9 +18,9 @@ func RegisterHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
 			return
 		}
 
-		tokenRaw, err := auth.Register(r.Context(), repository, content)
+		tokenString, err := auth.Register(r.Context(), repository, content)
 		if err != nil {
-			logging.Sugar.Info(err)
+			logging.Sugar.Error(err)
 			var loginExistsError *auth.LoginExistsError
 			if errors.As(err, &loginExistsError) {
 				w.WriteHeader(http.StatusConflict)
@@ -36,7 +36,7 @@ func RegisterHandle(repository repo.UserRepositoryInterface) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Authorization", "Bearer "+tokenRaw)
+		w.Header().Set("Authorization", auth.WrapTokenString(tokenString))
 		w.WriteHeader(http.StatusOK)
 	}
 }

@@ -35,7 +35,7 @@ func (e *IncorrectPasswordError) Error() string {
 	return fmt.Sprintf("For login \"%s\" incorrect password: \"%s\"", e.Login, e.Password)
 }
 
-func Login(ctx context.Context, repository repo.UserRepositoryInterface, input []byte) (string, error) {
+func Login(ctx context.Context, repository repo.UserRepository, input []byte) (string, error) {
 	loginRequest := &LoginRequest{}
 	err := easyjson.Unmarshal(input, loginRequest)
 
@@ -64,12 +64,12 @@ func Login(ctx context.Context, repository repo.UserRepositoryInterface, input [
 	}
 
 	token := GenerateToken(*user)
-	tokenRaw, err := TokenRaw(token)
+	tokenString, err := GenerateTokenString(token)
 	if err != nil {
 		return "", err
 	}
 
 	logging.Sugar.Infof("User with ID: %s login successfully", user.ID)
 
-	return tokenRaw, nil
+	return tokenString, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"diploma1/internal/app/config"
 	"diploma1/internal/app/handler"
+	"diploma1/internal/app/middleware"
 	"diploma1/internal/app/repo/postgresql"
 	"diploma1/internal/app/service/logging"
 	"fmt"
@@ -22,8 +23,17 @@ func (s *Server) Run() {
 	}()
 
 	s.Router.Group(func(r chi.Router) {
-		s.Router.Post(`/api/user/register`, handler.RegisterHandle(s.Repo))
-		s.Router.Post(`/api/user/login`, handler.LoginHandle(s.Repo))
+		r.Use(middleware.LogMiddleware())
+
+		r.Post(`/api/user/register`, handler.RegisterHandle(s.Repo))
+		r.Post(`/api/user/login`, handler.LoginHandle(s.Repo))
+	})
+
+	s.Router.Group(func(r chi.Router) {
+		r.Use(middleware.AuthMiddleware())
+		r.Use(middleware.LogMiddleware())
+
+		r.Post(`/api/user/orders`, handler.AddingOrderHandle(s.Repo))
 	})
 
 	logging.Sugar.Infow("Listen and serve", "Host", config.State().GopherMartAddress)

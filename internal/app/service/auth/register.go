@@ -29,7 +29,7 @@ func (e *LoginExistsError) Error() string {
 
 var ErrBadJson = errors.New("bad json")
 
-func Register(ctx context.Context, repository repo.UserRepositoryInterface, input []byte) (string, error) {
+func Register(ctx context.Context, repository repo.UserRepository, input []byte) (string, error) {
 	registerRequest := &RegisterRequest{}
 	err := easyjson.Unmarshal(input, registerRequest)
 
@@ -68,11 +68,11 @@ func Register(ctx context.Context, repository repo.UserRepositoryInterface, inpu
 	}
 
 	token := GenerateToken(*user)
-	tokenRaw, err := TokenRaw(token)
+	tokenString, err := GenerateTokenString(token)
 	if err != nil {
 		return "", err
 	}
 
 	logging.Sugar.Infof("User with ID: %s registered successfully", user.ID)
-	return tokenRaw, nil
+	return tokenString, nil
 }
