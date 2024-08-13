@@ -8,6 +8,7 @@ import (
 	"diploma1/internal/app/service/logging"
 	"diploma1/internal/app/service/order"
 	"errors"
+	"github.com/mailru/easyjson"
 	"net/http"
 )
 
@@ -51,5 +52,38 @@ func AddingOrderHandle(repository repo.OrderRepository) http.HandlerFunc {
 		}
 
 		w.WriteHeader(http.StatusAccepted)
+	}
+}
+
+func GetUserOrderListHandle(repository repo.OrderRepository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userOrderList, err := order.GetUserOrderList(r.Context(), repository)
+		if err != nil {
+			logging.Sugar.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if len(userOrderList) == 0 {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		rawBytes, err := easyjson.Marshal(userOrderList)
+		if err != nil {
+			logging.Sugar.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, err = w.Write(rawBytes)
+
+		if err != nil {
+			logging.Sugar.Error(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 }

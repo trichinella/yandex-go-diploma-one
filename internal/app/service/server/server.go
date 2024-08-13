@@ -34,6 +34,8 @@ func (s *Server) Run() {
 		r.Use(middleware.LogMiddleware())
 
 		r.Post(`/api/user/orders`, handler.AddingOrderHandle(s.Repo))
+		r.Get(`/api/user/orders`, handler.GetUserOrderListHandle(s.Repo))
+		r.Get(`/api/user/balance`, handler.GetBalanceHandle(s.Repo))
 	})
 
 	logging.Sugar.Infow("Listen and serve", "Host", config.State().GopherMartAddress)

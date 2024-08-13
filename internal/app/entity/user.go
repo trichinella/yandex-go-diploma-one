@@ -9,7 +9,8 @@ type User struct {
 	ID          uuid.UUID  `json:"uuid"`
 	Login       string     `json:"login"`
 	Password    string     `json:"password"`
-	Balance     int64      `json:"balance"`
+	Balance     float64    `json:"balance"`
+	Spent       float64    `json:"spent"`
 	CreatedDate *time.Time `json:"-"`
 }
 
@@ -19,7 +20,6 @@ func NewUser() *User {
 
 	return &User{
 		ID:          id,
-		Balance:     0,
 		CreatedDate: &now,
 	}
 }

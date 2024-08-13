@@ -2,18 +2,17 @@ package entity
 
 import (
 	"github.com/google/uuid"
-	"github.com/shopspring/decimal"
 	"time"
 )
 
 type Order struct {
-	ID          uuid.UUID           `json:"uuid"`
-	UserId      uuid.UUID           `json:"user_id"`
-	Number      int                 `json:"number"`
-	CreatedDate *time.Time          `json:"-"`
-	StatusId    uuid.UUID           `json:"status_id"`
-	Accrual     decimal.NullDecimal `json:"accrual"`
-	Paid        decimal.Decimal     `json:"paid"`
+	ID          uuid.UUID  `json:"uuid"`
+	UserId      uuid.UUID  `json:"user_id"`
+	Number      int        `json:"number"`
+	CreatedDate *time.Time `json:"-"`
+	StatusId    uuid.UUID  `json:"status_id"`
+	Accrual     float64    `json:"accrual"`
+	Paid        float64    `json:"paid"`
 }
 
 func NewOrder() *Order {
@@ -23,7 +22,6 @@ func NewOrder() *Order {
 	return &Order{
 		ID:          id,
 		CreatedDate: &now,
-		Paid:        decimal.Zero,
 	}
 }
 

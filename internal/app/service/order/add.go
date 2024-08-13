@@ -72,7 +72,7 @@ func AddOrder(ctx context.Context, repository repo.OrderRepository, input []byte
 
 	order = entity.NewOrder()
 	order.Number = orderNumber
-	order.StatusId = repository.OrderStatus(entity.NEW).ID
+	order.StatusId = repository.OrderStatusByCode(entity.NEW).ID
 	order.UserId = userID
 
 	order, err = repository.AddOrder(ctx, *order)

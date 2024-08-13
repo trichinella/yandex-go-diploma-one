@@ -1,0 +1,2 @@
+ALTER TABLE public.orders ALTER COLUMN accrual SET NOT NULL;
+ALTER TABLE public.orders ALTER COLUMN accrual DROP DEFAULT;
