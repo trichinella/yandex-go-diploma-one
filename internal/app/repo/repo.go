@@ -10,6 +10,7 @@ type UserRepository interface {
 	AddUser(ctx context.Context, user entity.User) (*entity.User, error)
 	UserByLogin(ctx context.Context, login string) (*entity.User, error)
 	UserById(ctx context.Context, id uuid.UUID) (*entity.User, error)
+	SaveUser(ctx context.Context, user *entity.User) error
 }
 
 type OrderRepository interface {
@@ -17,5 +18,7 @@ type OrderRepository interface {
 	OrderByNumber(ctx context.Context, orderNumber int) (*entity.Order, error)
 	OrderStatusByCode(statusCode entity.StatusCode) entity.OrderStatus
 	OrderStatusById(statusId uuid.UUID) entity.OrderStatus
-	OrdersByUser(ctx context.Context, id uuid.UUID) ([]entity.Order, error)
+	OrdersByUser(ctx context.Context, userId uuid.UUID) ([]entity.Order, error)
+	SaveOrder(ctx context.Context, order *entity.Order) error
+	WithdrawalOrdersByUser(ctx context.Context, userId uuid.UUID) ([]entity.Order, error)
 }

@@ -3,10 +3,10 @@ package auth
 import (
 	"context"
 	"diploma1/internal/app/entity"
+	"diploma1/internal/app/erroring"
 	"diploma1/internal/app/repo"
 	"diploma1/internal/app/service/logging"
 	"diploma1/internal/app/service/secret"
-	"errors"
 	"fmt"
 	"github.com/mailru/easyjson"
 	"strings"
@@ -27,14 +27,12 @@ func (e *LoginExistsError) Error() string {
 	return fmt.Sprintf("login already exists: \"%s\"", e.Login)
 }
 
-var ErrBadJson = errors.New("bad json")
-
 func Register(ctx context.Context, repository repo.UserRepository, input []byte) (string, error) {
 	registerRequest := &RegisterRequest{}
 	err := easyjson.Unmarshal(input, registerRequest)
 
 	if err != nil {
-		return "", ErrBadJson
+		return "", erroring.ErrBadJson
 	}
 
 	registerRequest.Login = strings.Trim(registerRequest.Login, " ")

@@ -92,3 +92,53 @@ ORDER BY created_date ASC
 
 	return orders, nil
 }
+
+func (r PostgresRepository) SaveOrder(ctx context.Context, order *entity.Order) error {
+	childCtx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	//в pgx можно отдельно не готовить - внутри делает хэш
+	_, err := r.DB.Prepare(childCtx, "saveOrder", `UPDATE public.orders 
+SET user_id=$1, number=$2, created_date=$3, status_id=$4, accrual=$5, paid=$6
+WHERE id=$7`)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.DB.Exec(context.Background(), "saveOrder", order.UserId, order.Number, order.CreatedDate, order.StatusId, order.Accrual, order.Paid, order.ID)
+
+	return err
+}
+
+func (r PostgresRepository) WithdrawalOrdersByUser(ctx context.Context, userId uuid.UUID) ([]entity.Order, error) {
+	childCtx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	//в pgx можно отдельно не готовить - внутри делает хэш
+	_, err := r.DB.Prepare(childCtx, "paidOrdersByUser", `SELECT id, user_id, number, created_date, status_id, accrual, paid 
+FROM public.orders 
+WHERE user_id = $1 AND paid > 0
+ORDER BY created_date ASC
+`)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.DB.Query(childCtx, "paidOrdersByUser", userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []entity.Order
+	for rows.Next() {
+		order := entity.Order{}
+		if err := rows.Scan(&order.ID, &order.UserId, &order.Number, &order.CreatedDate, &order.StatusId, &order.Accrual, &order.Paid); err != nil {
+			logging.Sugar.Fatalf("Error search order by number: %v", err)
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}

@@ -81,3 +81,21 @@ func (r PostgresRepository) UserById(ctx context.Context, id uuid.UUID) (*entity
 
 	return &foundUser, nil
 }
+
+func (r PostgresRepository) SaveUser(ctx context.Context, user *entity.User) error {
+	childCtx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	//в pgx можно отдельно не готовить - внутри делает хэш
+	_, err := r.DB.Prepare(childCtx, "saveUser", `UPDATE public.users 
+SET login=$1, password=$2, balance=$3, created_date=$4, spent=$5
+WHERE id = $6
+`)
+	if err != nil {
+		return err
+	}
+
+	_, err = r.DB.Exec(childCtx, "saveUser", user.Login, user.Password, user.Balance, user.CreatedDate, user.Spent, user.ID)
+
+	return err
+}

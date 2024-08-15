@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"diploma1/internal/app/erroring"
 	"diploma1/internal/app/handler/body"
 	"diploma1/internal/app/repo"
 	"diploma1/internal/app/service/auth"
@@ -27,7 +28,7 @@ func RegisterHandle(repository repo.UserRepository) http.HandlerFunc {
 				return
 			}
 
-			if errors.Is(err, auth.ErrBadJson) {
+			if errors.Is(err, erroring.ErrBadJson) {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}

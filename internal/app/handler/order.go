@@ -23,7 +23,7 @@ func AddingOrderHandle(repository repo.OrderRepository) http.HandlerFunc {
 
 		err = order.AddOrder(r.Context(), repository, content)
 		if err != nil {
-			var numberExistsError *order.NumberExistsError
+			var numberExistsError *erroring.NumberExistsError
 			if errors.As(err, &numberExistsError) {
 				w.WriteHeader(http.StatusOK)
 				return
@@ -41,7 +41,7 @@ func AddingOrderHandle(repository repo.OrderRepository) http.HandlerFunc {
 				return
 			}
 
-			var someoneElseOrderError *order.SomeoneElseOrderError
+			var someoneElseOrderError *erroring.SomeoneElseOrderError
 			if errors.As(err, &someoneElseOrderError) {
 				w.WriteHeader(http.StatusConflict)
 				return

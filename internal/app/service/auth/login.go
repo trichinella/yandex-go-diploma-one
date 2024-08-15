@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"diploma1/internal/app/erroring"
 	"diploma1/internal/app/repo"
 	"diploma1/internal/app/service/logging"
 	"diploma1/internal/app/service/secret"
@@ -40,7 +41,7 @@ func Login(ctx context.Context, repository repo.UserRepository, input []byte) (s
 	err := easyjson.Unmarshal(input, loginRequest)
 
 	if err != nil {
-		return "", ErrBadJson
+		return "", erroring.ErrBadJson
 	}
 
 	loginRequest.Login = strings.Trim(loginRequest.Login, " ")
