@@ -14,9 +14,9 @@ type options struct {
 var baseOptions = options{}
 
 func init() {
-	flag.StringVar(&baseOptions.GopherMartAddress, "a", "localhost:8080", "GopherMart host")
+	flag.StringVar(&baseOptions.GopherMartAddress, "a", "", "GopherMart host")
 	flag.StringVar(&baseOptions.DatabaseDSN, "d", "", "DSN for database")
-	flag.StringVar(&baseOptions.AccrualAddress, "r", "localhost:8081", "Accrual host")
+	flag.StringVar(&baseOptions.AccrualAddress, "r", "", "Accrual host")
 	flag.StringVar(&baseOptions.JWTKey, "jk", "simple_test_secret_key", "JWT key")
 }
 
