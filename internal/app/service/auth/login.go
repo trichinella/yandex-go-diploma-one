@@ -41,7 +41,7 @@ func Login(ctx context.Context, repository repo.UserRepository, input []byte) (s
 	err := easyjson.Unmarshal(input, loginRequest)
 
 	if err != nil {
-		return "", erroring.ErrBadJson
+		return "", erroring.ErrBadJSON
 	}
 
 	loginRequest.Login = strings.Trim(loginRequest.Login, " ")

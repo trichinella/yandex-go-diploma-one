@@ -32,7 +32,7 @@ func Register(ctx context.Context, repository repo.UserRepository, input []byte)
 	err := easyjson.Unmarshal(input, registerRequest)
 
 	if err != nil {
-		return "", erroring.ErrBadJson
+		return "", erroring.ErrBadJSON
 	}
 
 	registerRequest.Login = strings.Trim(registerRequest.Login, " ")

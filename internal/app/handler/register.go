@@ -28,7 +28,7 @@ func RegisterHandle(repository repo.UserRepository) http.HandlerFunc {
 				return
 			}
 
-			if errors.Is(err, erroring.ErrBadJson) {
+			if errors.Is(err, erroring.ErrBadJSON) {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}

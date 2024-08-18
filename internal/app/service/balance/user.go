@@ -46,7 +46,7 @@ func Withdraw(ctx context.Context, userRepo repo.UserRepository, orderRepo repo.
 	err := easyjson.Unmarshal(content, withdrawRequest)
 
 	if err != nil {
-		return erroring.ErrBadJson
+		return erroring.ErrBadJSON
 	}
 
 	orderNumber, err := strconv.Atoi(withdrawRequest.OrderNumber)
