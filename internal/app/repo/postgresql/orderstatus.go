@@ -11,8 +11,8 @@ import (
 var once map[entity.StatusCode]entity.OrderStatus
 var onceMutex sync.Mutex
 
-var onceId map[uuid.UUID]entity.OrderStatus
-var onceMutexId sync.Mutex
+var onceID map[uuid.UUID]entity.OrderStatus
+var onceMutexID sync.Mutex
 
 func (r PostgresRepository) OrderStatusByCode(statusCode entity.StatusCode) entity.OrderStatus {
 	onceMutex.Lock()
@@ -43,27 +43,27 @@ func (r PostgresRepository) directOrderStatusByCode(statusCode entity.StatusCode
 	return foundOrderStatus
 }
 
-func (r PostgresRepository) OrderStatusById(statusId uuid.UUID) entity.OrderStatus {
-	onceMutexId.Lock()
-	if onceId == nil {
-		onceId = make(map[uuid.UUID]entity.OrderStatus)
+func (r PostgresRepository) OrderStatusByID(statusID uuid.UUID) entity.OrderStatus {
+	onceMutexID.Lock()
+	if onceID == nil {
+		onceID = make(map[uuid.UUID]entity.OrderStatus)
 	}
-	if _, ok := onceId[statusId]; !ok {
-		onceId[statusId] = r.directOrderStatusById(statusId)
+	if _, ok := onceID[statusID]; !ok {
+		onceID[statusID] = r.directOrderStatusByID(statusID)
 	}
-	onceMutexId.Unlock()
+	onceMutexID.Unlock()
 
-	return onceId[statusId]
+	return onceID[statusID]
 }
 
-func (r PostgresRepository) directOrderStatusById(statusId uuid.UUID) entity.OrderStatus {
+func (r PostgresRepository) directOrderStatusByID(statusID uuid.UUID) entity.OrderStatus {
 	//в pgx можно отдельно не готовить - внутри делает хэш
-	_, err := r.DB.Prepare(context.Background(), "statusId", `SELECT id, title, code FROM public.order_statuses WHERE id = $1`)
+	_, err := r.DB.Prepare(context.Background(), "statusID", `SELECT id, title, code FROM public.order_statuses WHERE id = $1`)
 	if err != nil {
 		logging.Sugar.Fatalf("Error prepare order status by code: %v", err)
 	}
 
-	row := r.DB.QueryRow(context.Background(), "statusId", statusId)
+	row := r.DB.QueryRow(context.Background(), "statusID", statusID)
 	foundOrderStatus := entity.OrderStatus{}
 	if err := row.Scan(&foundOrderStatus.ID, &foundOrderStatus.Title, &foundOrderStatus.Code); err != nil {
 		logging.Sugar.Fatalf("Error search order status by id: %v", err)

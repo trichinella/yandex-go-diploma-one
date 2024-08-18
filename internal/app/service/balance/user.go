@@ -25,7 +25,7 @@ func GetUserFinanceState(ctx context.Context, repository repo.UserRepository) (*
 		return nil, erroring.ErrIncorrectUserID
 	}
 
-	user, err := repository.UserById(ctx, userID)
+	user, err := repository.UserByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -69,9 +69,9 @@ func Withdraw(ctx context.Context, userRepo repo.UserRepository, orderRepo repo.
 	}
 
 	if order != nil {
-		if order.UserId != userID {
+		if order.UserID != userID {
 			return &erroring.SomeoneElseOrderError{
-				OwnerID:     order.UserId,
+				OwnerID:     order.UserID,
 				TryUserID:   userID,
 				OrderNumber: order.Number,
 			}
@@ -84,7 +84,7 @@ func Withdraw(ctx context.Context, userRepo repo.UserRepository, orderRepo repo.
 	}
 
 	//mutex @todo
-	user, err := userRepo.UserById(ctx, userID)
+	user, err := userRepo.UserByID(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -101,8 +101,8 @@ func Withdraw(ctx context.Context, userRepo repo.UserRepository, orderRepo repo.
 	order = entity.NewOrder()
 	order.Number = orderNumber
 	order.Paid = withdrawRequest.Sum
-	order.UserId = user.ID
-	order.StatusId = orderRepo.OrderStatusByCode(entity.NEW).ID
+	order.UserID = user.ID
+	order.StatusID = orderRepo.OrderStatusByCode(entity.NEW).ID
 
 	err = userRepo.SaveUser(ctx, user)
 	if err != nil {

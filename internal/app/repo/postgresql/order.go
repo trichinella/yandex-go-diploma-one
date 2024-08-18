@@ -28,9 +28,9 @@ func (r PostgresRepository) AddOrder(ctx context.Context, order entity.Order) (*
 		return nil, err
 	}
 
-	row := r.DB.QueryRow(context.Background(), "addOrder", order.ID, order.UserId, order.Number, order.CreatedDate, order.StatusId, order.Accrual, order.Paid)
+	row := r.DB.QueryRow(context.Background(), "addOrder", order.ID, order.UserID, order.Number, order.CreatedDate, order.StatusID, order.Accrual, order.Paid)
 	createdOrder := entity.Order{}
-	if err := row.Scan(&createdOrder.ID, &createdOrder.UserId, &createdOrder.Number, &createdOrder.CreatedDate, &createdOrder.StatusId, &createdOrder.Accrual, &createdOrder.Paid); err != nil {
+	if err := row.Scan(&createdOrder.ID, &createdOrder.UserID, &createdOrder.Number, &createdOrder.CreatedDate, &createdOrder.StatusID, &createdOrder.Accrual, &createdOrder.Paid); err != nil {
 		logging.Sugar.Fatalf("Error adding order: %v", err)
 	}
 
@@ -49,7 +49,7 @@ func (r PostgresRepository) OrderByNumber(ctx context.Context, orderNumber int) 
 
 	row := r.DB.QueryRow(childCtx, "orderByNumber", orderNumber)
 	foundOrder := entity.Order{}
-	if err := row.Scan(&foundOrder.ID, &foundOrder.UserId, &foundOrder.Number, &foundOrder.CreatedDate, &foundOrder.StatusId, &foundOrder.Accrual, &foundOrder.Paid); err != nil {
+	if err := row.Scan(&foundOrder.ID, &foundOrder.UserID, &foundOrder.Number, &foundOrder.CreatedDate, &foundOrder.StatusID, &foundOrder.Accrual, &foundOrder.Paid); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, nil
 		}
@@ -60,7 +60,7 @@ func (r PostgresRepository) OrderByNumber(ctx context.Context, orderNumber int) 
 	return &foundOrder, nil
 }
 
-func (r PostgresRepository) OrdersByUser(ctx context.Context, userId uuid.UUID) ([]entity.Order, error) {
+func (r PostgresRepository) OrdersByUser(ctx context.Context, userID uuid.UUID) ([]entity.Order, error) {
 	childCtx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 
@@ -74,7 +74,7 @@ ORDER BY created_date ASC
 		return nil, err
 	}
 
-	rows, err := r.DB.Query(childCtx, "ordersByUser", userId)
+	rows, err := r.DB.Query(childCtx, "ordersByUser", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +83,7 @@ ORDER BY created_date ASC
 	var orders []entity.Order
 	for rows.Next() {
 		order := entity.Order{}
-		if err := rows.Scan(&order.ID, &order.UserId, &order.Number, &order.CreatedDate, &order.StatusId, &order.Accrual, &order.Paid); err != nil {
+		if err := rows.Scan(&order.ID, &order.UserID, &order.Number, &order.CreatedDate, &order.StatusID, &order.Accrual, &order.Paid); err != nil {
 			logging.Sugar.Fatalf("Error search order by number: %v", err)
 			return nil, err
 		}
@@ -105,12 +105,12 @@ WHERE id=$7`)
 		return err
 	}
 
-	_, err = r.DB.Exec(context.Background(), "saveOrder", order.UserId, order.Number, order.CreatedDate, order.StatusId, order.Accrual, order.Paid, order.ID)
+	_, err = r.DB.Exec(context.Background(), "saveOrder", order.UserID, order.Number, order.CreatedDate, order.StatusID, order.Accrual, order.Paid, order.ID)
 
 	return err
 }
 
-func (r PostgresRepository) WithdrawalOrdersByUser(ctx context.Context, userId uuid.UUID) ([]entity.Order, error) {
+func (r PostgresRepository) WithdrawalOrdersByUser(ctx context.Context, userID uuid.UUID) ([]entity.Order, error) {
 	childCtx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 
@@ -124,7 +124,7 @@ ORDER BY created_date ASC
 		return nil, err
 	}
 
-	rows, err := r.DB.Query(childCtx, "paidOrdersByUser", userId)
+	rows, err := r.DB.Query(childCtx, "paidOrdersByUser", userID)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ ORDER BY created_date ASC
 	var orders []entity.Order
 	for rows.Next() {
 		order := entity.Order{}
-		if err := rows.Scan(&order.ID, &order.UserId, &order.Number, &order.CreatedDate, &order.StatusId, &order.Accrual, &order.Paid); err != nil {
+		if err := rows.Scan(&order.ID, &order.UserID, &order.Number, &order.CreatedDate, &order.StatusID, &order.Accrual, &order.Paid); err != nil {
 			logging.Sugar.Fatalf("Error search order by number: %v", err)
 			return nil, err
 		}
@@ -166,7 +166,7 @@ ORDER BY created_date ASC
 	var orders []entity.Order
 	for rows.Next() {
 		order := entity.Order{}
-		if err := rows.Scan(&order.ID, &order.UserId, &order.Number, &order.CreatedDate, &order.StatusId, &order.Accrual, &order.Paid); err != nil {
+		if err := rows.Scan(&order.ID, &order.UserID, &order.Number, &order.CreatedDate, &order.StatusID, &order.Accrual, &order.Paid); err != nil {
 			logging.Sugar.Fatalf("Error search order by number: %v", err)
 			return nil, err
 		}

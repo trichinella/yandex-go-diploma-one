@@ -59,17 +59,17 @@ func (r PostgresRepository) UserByLogin(ctx context.Context, login string) (*ent
 	return &foundUser, nil
 }
 
-func (r PostgresRepository) UserById(ctx context.Context, id uuid.UUID) (*entity.User, error) {
+func (r PostgresRepository) UserByID(ctx context.Context, id uuid.UUID) (*entity.User, error) {
 	childCtx, cancel := context.WithTimeout(ctx, time.Second*3)
 	defer cancel()
 
 	//в pgx можно отдельно не готовить - внутри делает хэш
-	_, err := r.DB.Prepare(context.Background(), "userById", `SELECT id, login, password, balance, created_date, spent FROM public.users WHERE id = $1`)
+	_, err := r.DB.Prepare(context.Background(), "userByID", `SELECT id, login, password, balance, created_date, spent FROM public.users WHERE id = $1`)
 	if err != nil {
 		return nil, err
 	}
 
-	row := r.DB.QueryRow(childCtx, "userById", id)
+	row := r.DB.QueryRow(childCtx, "userByID", id)
 	foundUser := entity.User{}
 	if err := row.Scan(&foundUser.ID, &foundUser.Login, &foundUser.Password, &foundUser.Balance, &foundUser.CreatedDate, &foundUser.Spent); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

@@ -15,7 +15,7 @@ type PostgresRepository struct {
 func GetPostgresRepository() *PostgresRepository {
 	conn, err := pgx.Connect(context.Background(), config.State().DatabaseDSN)
 	if err != nil {
-		logging.Sugar.Fatal(fmt.Errorf("Unable to connect to database: %v\n", err))
+		logging.Sugar.Fatal(fmt.Errorf("unable to connect to database: %v\n", err))
 	}
 
 	return &PostgresRepository{

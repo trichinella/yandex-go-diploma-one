@@ -53,7 +53,7 @@ func newOrderHandle(order entity.Order, orderChannel chan entity.Order, orderRep
 	}
 
 	order.Accrual = receivedAccrualOrder.Accrual
-	order.StatusId = orderRepo.OrderStatusByCode(receivedAccrualOrder.Status).ID
+	order.StatusID = orderRepo.OrderStatusByCode(receivedAccrualOrder.Status).ID
 	//@todo mutex
 
 	err = orderRepo.SaveOrder(context.Background(), &order)
@@ -64,7 +64,7 @@ func newOrderHandle(order entity.Order, orderChannel chan entity.Order, orderRep
 		return
 	}
 
-	user, err := userRepo.UserById(context.Background(), order.UserId)
+	user, err := userRepo.UserByID(context.Background(), order.UserID)
 	if err != nil {
 		logging.Sugar.Error(err)
 		orderChannel <- order

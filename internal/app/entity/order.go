@@ -7,10 +7,10 @@ import (
 
 type Order struct {
 	ID          uuid.UUID  `json:"uuid"`
-	UserId      uuid.UUID  `json:"user_id"`
+	UserID      uuid.UUID  `json:"user_id"`
 	Number      int        `json:"number"`
 	CreatedDate *time.Time `json:"-"`
-	StatusId    uuid.UUID  `json:"status_id"`
+	StatusID    uuid.UUID  `json:"status_id"`
 	Accrual     float64    `json:"accrual"`
 	Paid        float64    `json:"paid"`
 }

@@ -36,9 +36,9 @@ func AddOrder(ctx context.Context, repository repo.OrderRepository, input []byte
 	}
 
 	if order != nil {
-		if order.UserId != userID {
+		if order.UserID != userID {
 			return &erroring.SomeoneElseOrderError{
-				OwnerID:     order.UserId,
+				OwnerID:     order.UserID,
 				TryUserID:   userID,
 				OrderNumber: order.Number,
 			}
@@ -52,8 +52,8 @@ func AddOrder(ctx context.Context, repository repo.OrderRepository, input []byte
 
 	order = entity.NewOrder()
 	order.Number = orderNumber
-	order.StatusId = repository.OrderStatusByCode(entity.NEW).ID
-	order.UserId = userID
+	order.StatusID = repository.OrderStatusByCode(entity.NEW).ID
+	order.UserID = userID
 
 	order, err = repository.AddOrder(ctx, *order)
 	if err != nil {

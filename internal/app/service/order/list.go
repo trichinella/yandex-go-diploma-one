@@ -37,7 +37,7 @@ func GetUserOrderList(ctx context.Context, repository repo.OrderRepository) (Use
 		userOrderList = append(userOrderList, UserOrder{
 			Number:      order.Number,
 			CreatedDate: order.CreatedDate,
-			Status:      repository.OrderStatusById(order.StatusId).Code,
+			Status:      repository.OrderStatusByID(order.StatusID).Code,
 			Accrual:     order.Accrual,
 		})
 	}

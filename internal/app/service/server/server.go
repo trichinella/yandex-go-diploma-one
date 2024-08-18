@@ -75,7 +75,7 @@ func Run() {
 	defer func() {
 		err := server.Repo.DB.Close(context.Background())
 		if err != nil {
-			logging.Sugar.Fatal(fmt.Errorf("Unable to close to database: %v\n", err))
+			logging.Sugar.Fatal(fmt.Errorf("unable to close to database: %v\n", err))
 		}
 	}()
 }
