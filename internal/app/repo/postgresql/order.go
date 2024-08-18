@@ -142,3 +142,36 @@ ORDER BY created_date ASC
 
 	return orders, nil
 }
+
+func (r PostgresRepository) NewOrders(ctx context.Context) ([]entity.Order, error) {
+	childCtx, cancel := context.WithTimeout(ctx, time.Second*3)
+	defer cancel()
+
+	//в pgx можно отдельно не готовить - внутри делает хэш
+	_, err := r.DB.Prepare(childCtx, "newOrders", `SELECT id, user_id, number, created_date, status_id, accrual, paid 
+FROM public.orders 
+WHERE status_id = $1
+ORDER BY created_date ASC
+`)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.DB.Query(childCtx, "newOrders", r.OrderStatusByCode(entity.NEW).ID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var orders []entity.Order
+	for rows.Next() {
+		order := entity.Order{}
+		if err := rows.Scan(&order.ID, &order.UserId, &order.Number, &order.CreatedDate, &order.StatusId, &order.Accrual, &order.Paid); err != nil {
+			logging.Sugar.Fatalf("Error search order by number: %v", err)
+			return nil, err
+		}
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}

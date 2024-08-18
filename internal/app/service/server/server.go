@@ -3,10 +3,13 @@ package server
 import (
 	"context"
 	"diploma1/internal/app/config"
+	"diploma1/internal/app/entity"
 	"diploma1/internal/app/handler"
 	"diploma1/internal/app/middleware"
 	"diploma1/internal/app/repo/postgresql"
+	"diploma1/internal/app/service/accrual"
 	"diploma1/internal/app/service/logging"
+	"diploma1/internal/app/service/start"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -22,8 +25,17 @@ func (s *Server) Run() {
 		_ = logging.Sugar.Sync()
 	}()
 
+	//Инициализация
+	//Миграция
+	start.ExecMigrations()
+	//Accrual сервис проинициализировать стартовыми данными
+	start.AccrualFilling()
+
+	orderChannel := make(chan entity.Order, 100)
+
 	s.Router.Group(func(r chi.Router) {
 		r.Use(middleware.LogMiddleware())
+		r.Use(middleware.Compress())
 
 		r.Post(`/api/user/register`, handler.RegisterHandle(s.Repo))
 		r.Post(`/api/user/login`, handler.LoginHandle(s.Repo))
@@ -32,13 +44,22 @@ func (s *Server) Run() {
 	s.Router.Group(func(r chi.Router) {
 		r.Use(middleware.AuthMiddleware())
 		r.Use(middleware.LogMiddleware())
+		r.Use(middleware.Compress())
 
-		r.Post(`/api/user/orders`, handler.AddingOrderHandle(s.Repo))
+		r.Post(`/api/user/orders`, handler.AddingOrderHandle(s.Repo, orderChannel))
 		r.Get(`/api/user/orders`, handler.GetUserOrderListHandle(s.Repo))
 		r.Get(`/api/user/balance`, handler.GetBalanceHandle(s.Repo))
 		r.Post(`/api/user/balance/withdraw`, handler.BalanceWithdrawHandle(s.Repo, s.Repo))
 		r.Get(`/api/user/withdrawals`, handler.UserWithdrawalsHandle(s.Repo))
 	})
+
+	go func() {
+		accrual.ReadOldOrders(s.Repo, orderChannel)
+	}()
+
+	go func() {
+		accrual.NewOrderQueue(s.Repo, s.Repo, orderChannel)
+	}()
 
 	logging.Sugar.Infow("Listen and serve", "Host", config.State().GopherMartAddress)
 	err := http.ListenAndServe(config.State().GopherMartAddress, s.Router)

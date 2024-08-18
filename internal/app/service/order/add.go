@@ -11,7 +11,7 @@ import (
 	"strconv"
 )
 
-func AddOrder(ctx context.Context, repository repo.OrderRepository, input []byte) error {
+func AddOrder(ctx context.Context, repository repo.OrderRepository, input []byte, orderChannel chan<- entity.Order) error {
 	if len(input) == 0 {
 		return erroring.ErrEmptyRequest
 	}
@@ -60,5 +60,8 @@ func AddOrder(ctx context.Context, repository repo.OrderRepository, input []byte
 		return err
 	}
 
+	go func() {
+		orderChannel <- *order
+	}()
 	return nil
 }

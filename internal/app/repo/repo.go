@@ -21,4 +21,5 @@ type OrderRepository interface {
 	OrdersByUser(ctx context.Context, userId uuid.UUID) ([]entity.Order, error)
 	SaveOrder(ctx context.Context, order *entity.Order) error
 	WithdrawalOrdersByUser(ctx context.Context, userId uuid.UUID) ([]entity.Order, error)
+	NewOrders(ctx context.Context) ([]entity.Order, error)
 }

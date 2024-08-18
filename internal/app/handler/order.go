@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"diploma1/internal/app/entity"
 	"diploma1/internal/app/erroring"
 	"diploma1/internal/app/handler/body"
 	"diploma1/internal/app/repo"
@@ -12,7 +13,7 @@ import (
 	"net/http"
 )
 
-func AddingOrderHandle(repository repo.OrderRepository) http.HandlerFunc {
+func AddingOrderHandle(repository repo.OrderRepository, orderChannel chan<- entity.Order) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		content, err := body.Content(r)
 		if err != nil {
@@ -21,7 +22,7 @@ func AddingOrderHandle(repository repo.OrderRepository) http.HandlerFunc {
 			return
 		}
 
-		err = order.AddOrder(r.Context(), repository, content)
+		err = order.AddOrder(r.Context(), repository, content, orderChannel)
 		if err != nil {
 			var numberExistsError *erroring.NumberExistsError
 			if errors.As(err, &numberExistsError) {

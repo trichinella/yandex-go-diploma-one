@@ -109,7 +109,7 @@ func Withdraw(ctx context.Context, userRepo repo.UserRepository, orderRepo repo.
 		return err
 	}
 
-	err = orderRepo.SaveOrder(ctx, order)
+	_, err = orderRepo.AddOrder(ctx, *order)
 	if err != nil {
 		return err
 	}
